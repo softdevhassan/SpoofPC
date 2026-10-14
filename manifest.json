@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "SpoofPC",
+  "version": "2.0.0",
+  "description": "SpoofPC - Instant multi-profile device emulator. Switch seamlessly between Streaming DRM (Netflix Ready), Pixel 10 Pro Phone, and Pixel Tablet without resizing your browser.",
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "SpoofPC Device Controller",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

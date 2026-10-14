@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpoofPC Controller</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #111827;
+      --card-hover: #162032;
+      --border: #1f293d;
+      --border-active: #10b981;
+      --text: #f9fafb;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --accent: #3b82f6;
+      --badge-bg: rgba(16, 185, 129, 0.15);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+    body {
+      width: 340px;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge.on {
+      background: var(--badge-bg);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-badge.off {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    /* Switch */
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .switch-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background-color: #334155;
+      border-radius: 9999px;
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    input:checked + .slider {
+      background-color: var(--green);
+    }
+    input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+    /* Profiles section */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .profile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .profile-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .profile-card:hover {
+      background: var(--card-hover);
+      border-color: #334155;
+    }
+    .profile-card.active {
+      border-color: var(--border-active);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .profile-icon {
+      font-size: 20px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .profile-details {
+      flex: 1;
+    }
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .profile-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1e293b;
+      color: #38bdf8;
+    }
+    .profile-tag.drm {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+    }
+    .profile-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    /* Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .auto-reload-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .benchmark-link {
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .benchmark-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-group">
+      <span style="font-size: 18px;">⚡</span>
+      <span class="logo-text">SpoofPC</span>
+    </div>
+    <span id="status-badge" class="status-badge off">OFF</span>
+  </div>
+
+  <div class="switch-row">
+    <span class="switch-label">Emulation Mode</span>
+    <label class="toggle">
+      <input type="checkbox" id="master-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="section-title">Select Profile</div>
+
+  <div class="profile-list">
+    <!-- Profile 1: Streaming & Touch -->
+    <div class="profile-card active" data-profile="streaming">
+      <div class="profile-icon">🎬</div>
+      <div class="profile-details">
+        <div class="profile-header">
+          <span class="profile-name">Streaming & Touch</span>
+          <span class="profile-tag drm">Netflix Ready</span>
+        </div>
+        <div class="profile-desc">Windows 11 Surface profile. 100% Widevine DRM video playback + touch screen enabled.</div>
+      </div>
+    </div>
+
+    <!-- Profile 2: Mobile Phone -->
+    <div class="profile-card" data-profile="phone">
+      <div class="profile-icon">📱</div>
+      <div class="profile-details">
+        <div class="profile-header">
+          <span class="profile-name">Google Pixel 10 Pro</span>
+          <span class="profile-tag">Phone 412px</span>
+        </div>
+        <div class="profile-desc">Strict Android 15 mobile phone simulation for mobile-only responsive functionality.</div>
+      </div>
+    </div>
+
+    <!-- Profile 3: Tablet -->
+    <div class="profile-card" data-profile="tablet">
+      <div class="profile-icon">📟</div>
+      <div class="profile-details">
+        <div class="profile-header">
+          <span class="profile-name">Google Pixel Tablet</span>
+          <span class="profile-tag">Tablet 1280px</span>
+        </div>
+        <div class="profile-desc">Large touchscreen emulation without mobile app store redirects or banners.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <label class="auto-reload-label">
+      <input type="checkbox" id="auto-reload-toggle" checked>
+      <span>Auto-reload tab</span>
+    </label>
+    <a id="test-benchmark-btn" class="benchmark-link">Test Benchmark</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

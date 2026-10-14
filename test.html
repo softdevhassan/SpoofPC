@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpoofPC — Multi-Profile Benchmark</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --blue: #38bdf8;
+      --red: #ef4444;
+      --accent: #3b82f6;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 32px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge.off {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .card h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .card .val {
+      font-size: 17px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .code-box {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--blue);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .refresh-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+    .refresh-btn:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 style="font-size: 22px; margin-bottom: 6px;">SpoofPC Benchmark</h1>
+        <p style="color: var(--muted); font-size: 14px;">Live Multi-Profile Device Emulation Inspector</p>
+      </div>
+      <div id="detection-badge" class="badge off">
+        <span class="status-dot"></span>
+        <span id="detection-text">Detecting...</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Active Profile</h3>
+        <div id="active-profile" class="val">-</div>
+      </div>
+      <div class="card">
+        <h3>DRM / Netflix Web Player</h3>
+        <div id="drm-status" class="val">-</div>
+      </div>
+      <div class="card">
+        <h3>Touch Emulation</h3>
+        <div id="touch-points" class="val">-</div>
+      </div>
+      <div class="card">
+        <h3>Reported Platform</h3>
+        <div id="platform-val" class="val">-</div>
+      </div>
+      <div class="card">
+        <h3>JS Dimensions</h3>
+        <div id="js-dimensions" class="val">-</div>
+      </div>
+      <div class="card">
+        <h3>matchMedia ('pointer: coarse')</h3>
+        <div id="media-touch" class="val">-</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>User-Agent String</h3>
+      <div id="user-agent" class="code-box">-</div>
+    </div>
+
+    <div class="card">
+      <h3>Client Hints (navigator.userAgentData)</h3>
+      <div id="client-hints" class="code-box">Loading client hints...</div>
+    </div>
+
+    <button class="refresh-btn" onclick="location.reload()">Refresh Page</button>
+  </div>
+
+  <script>
+    (async function runBenchmark() {
+      const ua = navigator.userAgent;
+      const isTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+      const isPhone = /Pixel 10 Pro/i.test(ua);
+      const isTablet = /Pixel Tablet/i.test(ua);
+      const isStreaming = isTouch && (/Win32|Windows/i.test(navigator.platform) || /Windows NT/i.test(ua)) && !isPhone && !isTablet;
+
+      const badge = document.getElementById('detection-badge');
+      const badgeText = document.getElementById('detection-text');
+
+      if (isStreaming) {
+        badge.className = 'badge active';
+        badgeText.textContent = 'STREAMING & TOUCH (ON)';
+        document.getElementById('active-profile').textContent = 'Streaming & Touch (Windows 11 Surface)';
+        document.getElementById('drm-status').textContent = '100% Compatible (Widevine Active)';
+        document.getElementById('drm-status').style.color = '#10b981';
+      } else if (isPhone) {
+        badge.className = 'badge active';
+        badgeText.textContent = 'MOBILE PHONE (ON)';
+        document.getElementById('active-profile').textContent = 'Google Pixel 10 Pro (Phone)';
+        document.getElementById('drm-status').textContent = 'Mobile Phone Layout (Requires App on Netflix)';
+        document.getElementById('drm-status').style.color = '#f59e0b';
+      } else if (isTablet) {
+        badge.className = 'badge active';
+        badgeText.textContent = 'TABLET (ON)';
+        document.getElementById('active-profile').textContent = 'Google Pixel Tablet';
+        document.getElementById('drm-status').textContent = 'Tablet Mode (No App Redirects)';
+        document.getElementById('drm-status').style.color = '#38bdf8';
+      } else {
+        badge.className = 'badge off';
+        badgeText.textContent = 'STANDBY (OFF)';
+        document.getElementById('active-profile').textContent = 'Standard Desktop';
+        document.getElementById('drm-status').textContent = 'Standard Desktop';
+        document.getElementById('drm-status').style.color = '#94a3b8';
+      }
+
+      document.getElementById('platform-val').textContent = navigator.platform || 'Unknown';
+      document.getElementById('touch-points').textContent = `${navigator.maxTouchPoints} touch points (ontouchstart: ${'ontouchstart' in window})`;
+      document.getElementById('js-dimensions').textContent = `${window.innerWidth}px × ${window.innerHeight}px (DPR: ${window.devicePixelRatio})`;
+      
+      const mediaTouch = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : 'N/A';
+      document.getElementById('media-touch').textContent = mediaTouch ? 'Matches (Touch Screen)' : 'No Match (Mouse Pointer)';
+      document.getElementById('user-agent').textContent = ua;
+
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        try {
+          const highEntropy = await navigator.userAgentData.getHighEntropyValues([
+            'architecture', 'model', 'platform', 'platformVersion', 'bitness'
+          ]);
+          document.getElementById('client-hints').textContent = JSON.stringify({
+            mobile: navigator.userAgentData.mobile,
+            platform: navigator.userAgentData.platform,
+            brands: navigator.userAgentData.brands,
+            highEntropy
+          }, null, 2);
+        } catch (e) {
+          document.getElementById('client-hints').textContent = 'Error querying client hints: ' + e.message;
+        }
+      } else {
+        document.getElementById('client-hints').textContent = 'navigator.userAgentData is not supported.';
+      }
+    })();
+  </script>
+</body>
+</html>

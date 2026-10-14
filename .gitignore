@@ -1,0 +1,42 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Build and Packaging Artifacts (Chrome Extension)
+*.zip
+*.crx
+*.pem
+dist/
+build/
+out/
+tmp/
+
+# Logs and Debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node / Dependencies (if package tools are ever introduced)
+node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
